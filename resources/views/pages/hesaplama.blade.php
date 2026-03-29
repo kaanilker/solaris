@@ -72,7 +72,7 @@
     {{-- TARİHİ FIRTINALAR --}}
     <section id="historic-storms-section" class="glass rounded-xl p-5 border border-white/10">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="font-display font-semibold text-lg text-white">Tarihi Fırtınalar</h2>
+            <h2 class="font-display font-semibold text-lg text-white">Tarihteki Fırtınalar</h2>
             <button onclick="clearStormSelection()" class="px-3 py-1 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/5">
                 Temizle
             </button>
@@ -235,7 +235,7 @@
             </div>
 
             <div id="weighted-cosine-box" class="mt-3 glass p-4 text-center rounded-xl bg-sky-900/30 border border-sky-500/40 relative overflow-hidden">
-                <div class="text-xs text-sky-300 mb-1 relative z-10">Ağırlıklı Kosinüs Benzerliği (Tarihi Fırtına Eşleşmesi)</div>
+                <div class="text-xs text-sky-300 mb-1 relative z-10">Ağırlıklı Kosinüs Benzerliği (Tarihteki Fırtına Eşleşmesi)</div>
                 <div class="text-lg font-bold text-white relative z-10" id="weighted-cosine-storm-name">--</div>
                 <div class="text-3xl font-black text-sky-200 relative z-10 mt-1" id="weighted-cosine-score">%0.0</div>
             </div>
@@ -589,6 +589,69 @@ function parseXRayFlux(fluxStr) {
     return coeff * multiplier;
 }
 
+function calculateStormPerfectSimilarity(stormParams) {
+    // Tarihi fırtınanın parametrelerinden "mükemmel fırtına" skorunu hesapla
+    const maxVals = {
+        vp: 3000, np: 150, pd: 150, pe: 30,
+        bz: 150, db_dt: 5000, dst: 1500, sym_h: 600, kp: 9, k: 9, e_field: 30, 
+        ae: 4000, asy_h: 600, pc: 25,
+        xray: 5e-3, proton10: 100000, proton100: 10000, f107: 400,
+        dtec: 150, tec: 300, gtec: 300, ftec: 150, qtec: 50
+    };
+
+    const norm = (val, maxLim) => Math.min(1.0, Math.abs(parseFloat(val) || 0) / maxLim);
+
+    // Kinetik
+    let n_vp = norm(stormParams['proton_hizi_vp'], maxVals.vp);
+    let n_np = norm(stormParams['proton_yogunlugu_np'], maxVals.np);
+    let n_pd = norm(stormParams['dinamik_basinc_pd'], maxVals.pd);
+    let n_pe = norm(stormParams['etkin_basinc_pe'], maxVals.pe);
+    let scoreKinetic = (n_vp * 0.40) + (n_np * 0.30) + (n_pe * 0.18) + (n_pd * 0.12);
+
+    // Manyetik
+    let bz_val = parseFloat(stormParams['kuzey_guney_imf_bz']) || 0;
+    let bz_risk = Math.abs(bz_val); // Tarihi fırtınalarda genelde Güney yönü baskın
+    let n_bz = norm(bz_risk, maxVals.bz);
+    
+    let n_dst = norm(stormParams['dst_indeksi'], maxVals.dst);
+    let n_dbdt = norm(stormParams['db_dt'], maxVals.db_dt);
+    let n_symh = norm(stormParams['sym_h_indeksi'], maxVals.sym_h);
+    let n_kp = norm(stormParams['kp_indeksi'], maxVals.kp);
+    let n_e = norm(stormParams['jeoelektrik_alan_e'], maxVals.e_field);
+    let n_ae = norm(stormParams['ae_indeksi'], maxVals.ae);
+    let n_asyh = norm(stormParams['asy_h_indeksi'], maxVals.asy_h);
+    let n_pc = norm(stormParams['pc_indeksi'], maxVals.pc);
+    let n_k = norm(stormParams['k_indeksi'], maxVals.k);
+    
+    let scoreMagnetic = (n_bz * 0.25) + (n_dbdt * 0.20) + (n_dst * 0.12) + (n_symh * 0.10) + 
+                        (n_kp * 0.08) + (n_e * 0.07) + (n_ae * 0.06) + (n_asyh * 0.05) + (n_pc * 0.04) + (n_k * 0.03);
+
+    // Foton
+    let rawXray = stormParams['x_ray_flux'] || '';
+    let parsedXray = typeof rawXray === 'string' ? parseXRayFlux(rawXray) : parseFloat(rawXray) || 0;
+    let n_xray = Math.min(1.0, parsedXray / maxVals.xray);
+    let n_prot10 = norm(stormParams['proton_flux_10mev'], maxVals.proton10);
+    let n_prot100 = norm(stormParams['proton_flux_100mev'], maxVals.proton100);
+    let n_f107 = norm(stormParams['f10_7_cm_flux'], maxVals.f107);
+    let scorePhoton = (n_xray * 0.35) + (n_prot10 * 0.30) + (n_prot100 * 0.20) + (n_f107 * 0.15);
+
+    // İyonosferik
+    let n_dtec = norm(stormParams['dtec'], maxVals.dtec);
+    let n_tec = norm(stormParams['tec'], maxVals.tec);
+    let n_gtec = norm(stormParams['gtec'], maxVals.gtec);
+    let n_ftec = norm(stormParams['ftec'], maxVals.ftec);
+    let n_qtec = norm(stormParams['qtec'], maxVals.qtec);
+    
+    let sumSurvIono = 0.58;
+    let scoreIono = (n_dtec * (0.25/sumSurvIono)) + (n_tec * (0.12/sumSurvIono)) + 
+                    (n_gtec * (0.09/sumSurvIono)) + (n_ftec * (0.07/sumSurvIono)) + 
+                    (n_qtec * (0.05/sumSurvIono));
+
+    // Global Score
+    let perfectSimilarity = (scoreMagnetic * 0.39) + (scoreKinetic * 0.31) + (scorePhoton * 0.18) + (scoreIono * 0.12);
+    return Math.max(0, Math.min(1.0, perfectSimilarity));
+}
+
 function calculateFuzzySimilarity(rawInputs, formulas) {
     const maxVals = {
         vp: 3000, np: 150, pd: 150, pe: 30,
@@ -811,7 +874,7 @@ function updateWeightedCosineUI(bestMatch) {
     const scoreEl = document.getElementById('weighted-cosine-score');
     if (!nameEl || !scoreEl) return;
     if (!bestMatch) {
-        nameEl.textContent = 'Tarihi fırtına verisi bulunamadı';
+        nameEl.textContent = 'Tarihteki fırtına verisi bulunamadı';
         scoreEl.textContent = '%0.0';
         return;
     }
@@ -824,12 +887,10 @@ function updateFinalRiskScore(perfectSimilarity, weightedCosineSimilarity) {
     if (!scoreEl) return;
 
     const s = Math.max(0, Math.min(1, parseFloat(perfectSimilarity) || 0));
-    const rawC = parseFloat(weightedCosineSimilarity) || 0;
-    const c = Math.max(0, Math.min(1, rawC));
+    const adjustedC = parseFloat(weightedCosineSimilarity) || 0; // Artık zaten %40'lık kısmı içeriyor
 
-    const weightedS = s * 0.6;
-    const weightedC = c * 0.4;
-    const finalRisk = Math.sqrt((Math.pow(weightedS, 2) + Math.pow(weightedC, 2)) / 2);
+    // Final Risk = Mükemmel Skor × %60 + Ayarlanmış Kosinüs (zaten %40'lık)
+    const finalRisk = (s * 0.6) + adjustedC;
 
     scoreEl.textContent = finalRisk.toFixed(3);
 }
@@ -866,16 +927,33 @@ function calculateWeightedCosineSimilarity(rawInputs, formulas) {
 
         const payda = Math.sqrt(aTerm) * Math.sqrt(bTerm);
         const similarity = payda > 0 ? (pay / payda) : 0;
+        
+        // En yüksek kosinüs benzerliğine sahip fırtınayı bul
         if (!best || similarity > best.similarity) {
             best = {
                 name: storm.firtina_adi || `Fırtına ${storm.id}`,
-                similarity: Math.max(0, Math.min(1, similarity))
+                similarity: Math.max(0, Math.min(1, similarity)),
+                params: params
             };
         }
     });
 
+    if (!best) {
+        updateWeightedCosineUI(null);
+        return 0;
+    }
+
+    // En benzer fırtınanın "mükemmel fırtına" skorunu hesapla
+    const stormPerfectScore = calculateStormPerfectSimilarity(best.params);
+    
+    // Kosinüs benzerliği × o fırtınanın mükemmel skoru × %40
+    const finalValue = best.similarity * stormPerfectScore * 0.4;
+    
+    best.stormPerfectScore = stormPerfectScore;
+    best.finalValue = finalValue;
+    
     updateWeightedCosineUI(best);
-    return best ? best.similarity : 0;
+    return finalValue;
 }
 
 function renderFormulasGrid(formulas) {
@@ -961,6 +1039,49 @@ function updateAnimationIntensity(score) {
 }
 
 function runCalculation() {
+    // 0. Tüm parametrelerin doldurulup doldurulmadığını kontrol et
+    const missingParams = [];
+    const paramLabels = {
+        'proton_yogunlugu_np': 'Proton Yoğunluğu (np)',
+        'proton_hizi_vp': 'Proton Hızı (vp)',
+        'kuzey_guney_imf_bz': 'IMF Bz',
+        'dinamik_basinc_pd': 'Dinamik Basınç (pd)',
+        'etkin_basinc_pe': 'Etkin Basınç (pe)',
+        'x_ray_flux': 'X-Ray Flux',
+        'f10_7_cm_flux': 'F10.7 cm Flux',
+        'proton_flux_10mev': 'Proton Flux (>10 MeV)',
+        'proton_flux_100mev': 'Proton Flux (>100 MeV)',
+        'tec': 'TEC',
+        'dtec': 'dTEC',
+        'gtec': 'GTEC',
+        'qtec': 'qTEC',
+        'ftec': 'fTEC',
+        'kp_indeksi': 'Kp İndeksi',
+        'k_indeksi': 'K İndeksi',
+        'dst_indeksi': 'Dst İndeksi',
+        'sym_h_indeksi': 'SYM-H İndeksi',
+        'asy_h_indeksi': 'ASY-H İndeksi',
+        'ae_indeksi': 'AE İndeksi',
+        'pc_indeksi': 'PC İndeksi',
+        'db_dt': 'dB/dt',
+        'jeoelektrik_alan_e': 'Jeoelektrik Alan (E)'
+    };
+    
+    paramKeys.forEach(key => {
+        if (key === 'imf_yonu') return; // Dropdown her zaman değer içerir
+        const inputEl = document.getElementById('param-' + key);
+        if (!inputEl) return;
+        const val = inputEl.value.trim();
+        if (val === '' || val === null || val === undefined) {
+            missingParams.push(paramLabels[key] || key);
+        }
+    });
+    
+    if (missingParams.length > 0) {
+        alert('⚠️ Lütfen tüm parametreleri doldurun!\n\nEksik alanlar:\n• ' + missingParams.join('\n• '));
+        return;
+    }
+    
     // 1. Ekranı Değiştir (Formları Gizle)
     document.getElementById('historic-storms-section').classList.add('hidden');
     document.getElementById('parameter-entry-section').classList.add('hidden');
