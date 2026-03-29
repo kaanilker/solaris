@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Geçmiş — Tarihi Güneş Fırtınaları | Solar Watch</title>
+<title>Tarihsel Fırtınalar — Güneş Fırtınaları | Solar Watch</title>
 <meta name="description" content="Tarihi güneş fırtınalarını 3D interaktif görselleştirme ile keşfedin. Carrington 1859, Quebec 1989 ve daha fazlası.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -594,7 +594,7 @@ body:active { cursor: grabbing; }
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            Geçmiş
+                            Tarihsel Fırtınalar
                         </a>
                     </li>
                     <li>
@@ -645,7 +645,7 @@ body:active { cursor: grabbing; }
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Geçmiş
+                        Tarihsel Fırtınalar
                     </a>
                 </li>
                 <li>
@@ -1772,4 +1772,3 @@ animate();
 
 </body>
 </html>
-
