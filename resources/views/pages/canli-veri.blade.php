@@ -364,7 +364,7 @@
             </div>
 
             <div id="weighted-cosine-box" class="mt-3 glass p-4 text-center rounded-xl bg-sky-900/30 border border-sky-500/40 relative overflow-hidden">
-                <div class="text-xs text-sky-300 mb-1 relative z-10">Ağırlıklı Kosinüs Benzerliği (Tarihi Fırtına Eşleşmesi)</div>
+                <div class="text-xs text-sky-300 mb-1 relative z-10">Ağırlıklı Kosinüs Benzerliği (Tarihteki Fırtına Eşleşmesi)</div>
                 <div class="text-lg font-bold text-white relative z-10" id="weighted-cosine-storm-name">--</div>
                 <div class="text-3xl font-black text-sky-200 relative z-10 mt-1" id="weighted-cosine-score">%0.0</div>
             </div>
@@ -1826,6 +1826,66 @@ const SolarisLive = {
         };
     },
 
+    calculateStormPerfectSimilarity: function(stormParams) {
+        // Tarihteki fırtınanın parametrelerinden "mükemmel fırtına" skorunu hesapla
+        const norm = (val, max) => Math.min(1.0, Math.abs(parseFloat(val) || 0) / max);
+        
+        const maxVals = {
+            vp: 2000, np: 100, pd: 100, pe: 50,
+            bz: 50, dst: 500, db_dt: 50, sym_h: 200, kp: 9, e_field: 50,
+            ae: 2500, asy_h: 200, pc: 20, k: 9,
+            xray: 1e-3, proton10: 100000, proton100: 10000, f107: 350,
+            dtec: 50, tec: 100, gtec: 60, ftec: 80, qtec: 50
+        };
+
+        // Kinetik
+        const n_vp = norm(stormParams['proton_hizi_vp'], maxVals.vp);
+        const n_np = norm(stormParams['proton_yogunlugu_np'], maxVals.np);
+        const n_pd = norm(stormParams['dinamik_basinc_pd'], maxVals.pd);
+        const n_pe = norm(stormParams['etkin_basinc_pe'], maxVals.pe);
+        const scoreKinetic = (n_vp * 0.40) + (n_np * 0.30) + (n_pe * 0.18) + (n_pd * 0.12);
+
+        // Manyetik
+        const bz_val = parseFloat(stormParams['kuzey_guney_imf_bz']) || 0;
+        const bz_risk = Math.abs(bz_val);
+        const n_bz = norm(bz_risk, maxVals.bz);
+        const n_dst = norm(stormParams['dst_indeksi'], maxVals.dst);
+        const n_kp = norm(stormParams['kp_indeksi'], maxVals.kp);
+        const n_ae = norm(stormParams['ae_indeksi'], maxVals.ae);
+        const n_dbdt = norm(stormParams['db_dt'], maxVals.db_dt);
+        const n_e = norm(stormParams['jeoelektrik_alan_e'], maxVals.e_field);
+        const scoreMagnetic = (n_bz * 0.30) + (n_dbdt * 0.22) + (n_dst * 0.18) + (n_kp * 0.15) + (n_ae * 0.10) + (n_e * 0.05);
+
+        // Foton/Radyasyon
+        const rawXray = stormParams['x_ray_flux'] || '';
+        const parsedXray = typeof rawXray === 'string' ? this.parseXRayFlux(rawXray) : parseFloat(rawXray) || 0;
+        const n_xray = Math.min(1.0, parsedXray / maxVals.xray);
+        const n_prot10 = norm(stormParams['proton_flux_10mev'], maxVals.proton10);
+        const n_f107 = norm(stormParams['f10_7_cm_flux'], maxVals.f107);
+        const scorePhoton = (n_xray * 0.45) + (n_prot10 * 0.35) + (n_f107 * 0.20);
+
+        // İyonosferik
+        const n_dtec = norm(stormParams['dtec'], maxVals.dtec);
+        const n_gtec = norm(stormParams['gtec'], maxVals.gtec);
+        const n_ftec = norm(stormParams['ftec'], maxVals.ftec);
+        const scoreIono = (n_dtec * 0.45) + (n_gtec * 0.30) + (n_ftec * 0.25);
+
+        // Global Skor
+        const perfectSimilarity = (scoreMagnetic * 0.39) + (scoreKinetic * 0.31) + (scorePhoton * 0.18) + (scoreIono * 0.12);
+        return Math.max(0, Math.min(1.0, perfectSimilarity));
+    },
+
+    parseXRayFlux: function(fluxStr) {
+        if (!fluxStr) return 0;
+        fluxStr = fluxStr.toString().trim().toUpperCase();
+        const match = fluxStr.match(/([A-Z])([\d.]+)/);
+        if (!match) return 0;
+        const coeffMap = { 'A': 1e-8, 'B': 1e-7, 'C': 1e-6, 'M': 1e-5, 'X': 1e-4 };
+        const coeff = coeffMap[match[1]] || 0;
+        const multiplier = parseFloat(match[2]) || 1;
+        return coeff * multiplier;
+    },
+
     calculateWeightedCosineConfirmation: function() {
         if (!Array.isArray(this.historicStorms) || !this.historicStorms.length) {
             this.updateWeightedCosineUI(null);
@@ -1861,16 +1921,34 @@ const SolarisLive = {
 
             const payda = Math.sqrt(aTerm) * Math.sqrt(bTerm);
             const similarity = payda > 0 ? (pay / payda) : 0;
+            
+            // En yüksek kosinüs benzerliğine sahip fırtınayı bul
             if (!best || similarity > best.similarity) {
                 best = {
                     name: storm.firtina_adi || `Fırtına ${storm.id}`,
-                    similarity: Math.max(0, Math.min(1, similarity))
+                    similarity: Math.max(0, Math.min(1, similarity)),
+                    params: params
                 };
             }
         });
 
+        if (!best) {
+            this.updateWeightedCosineUI(null);
+            this.updateFinalRiskScore(this.latestPerfectSimilarity, 0);
+            return;
+        }
+
+        // En benzer fırtınanın "mükemmel fırtına" skorunu hesapla
+        const stormPerfectScore = this.calculateStormPerfectSimilarity(best.params);
+        
+        // Kosinüs benzerliği × o fırtınanın mükemmel skoru × %40
+        const finalValue = best.similarity * stormPerfectScore * 0.4;
+        
+        best.stormPerfectScore = stormPerfectScore;
+        best.finalValue = finalValue;
+
         this.updateWeightedCosineUI(best);
-        this.updateFinalRiskScore(this.latestPerfectSimilarity, best ? best.similarity : 0);
+        this.updateFinalRiskScore(this.latestPerfectSimilarity, finalValue);
     },
 
     updateWeightedCosineUI: function(bestMatch) {
@@ -1878,7 +1956,7 @@ const SolarisLive = {
         const scoreEl = document.getElementById('weighted-cosine-score');
         if (!nameEl || !scoreEl) return;
         if (!bestMatch) {
-            nameEl.textContent = 'Tarihi fırtına verisi bekleniyor...';
+            nameEl.textContent = 'Tarihteki fırtına verisi bekleniyor...';
             scoreEl.textContent = '%0.0';
             return;
         }
@@ -1891,12 +1969,10 @@ const SolarisLive = {
         if (!scoreEl) return;
 
         const s = Math.max(0, Math.min(1, parseFloat(perfectSimilarity) || 0));
-        const rawC = parseFloat(weightedCosineSimilarity) || 0;
-        const c = Math.max(0, Math.min(1, rawC));
+        const adjustedC = parseFloat(weightedCosineSimilarity) || 0; // Artık zaten %40'lık kısmı içeriyor
 
-        const weightedS = s * 0.6;
-        const weightedC = c * 0.4;
-        const finalRisk = Math.sqrt((Math.pow(weightedS, 2) + Math.pow(weightedC, 2)) / 2);
+        // Final Risk = Mükemmel Skor × %60 + Ayarlanmış Kosinüs (zaten %40'lık)
+        const finalRisk = (s * 0.6) + adjustedC;
 
         scoreEl.textContent = finalRisk.toFixed(3);
     },
@@ -1999,4 +2075,3 @@ window.SolarisLive = SolarisLive;
 window.SolarSystem3D = SolarSystem3D;
 </script>
 @endsection
-
