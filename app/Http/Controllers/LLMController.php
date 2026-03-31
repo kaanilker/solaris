@@ -8,10 +8,6 @@ use Illuminate\Support\Facades\Log;
 
 class LLMController extends Controller
 {
-    /**
-     * Güneş Fırtınası verilerini AWS Bedrock Llama 3 70B modeline gönderir
-     * ve dönen analiz raporunu HTML formatında geri döndürür.
-     */
     public function analyze(Request $request)
     {
         $prompt = $request->input('prompt');
@@ -102,4 +98,3 @@ Sadece geçerli HTML kodu döndür, açıklama yapma. Diğer başlıklar için <
         }
     }
 }
-
