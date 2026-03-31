@@ -161,9 +161,6 @@
 @section('content')
 <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-    {{-- ════════════════════════════════════════════════════════
-         HERO SECTION - Canlı Durum
-    ════════════════════════════════════════════════════════ --}}
     <section class="relative">
         <div class="glass gradient-border rounded-3xl p-8 lg:p-12 relative overflow-hidden">
             {{-- Animated background elements --}}
@@ -207,9 +204,6 @@
         </div>
     </section>
 
-    {{-- ════════════════════════════════════════════════════════
-         REAL-TIME PARAMETER CARDS (En Önemli 10 Parametre)
-    ════════════════════════════════════════════════════════ --}}
     <section>
         <div class="mb-4">
             <h2 class="font-display font-bold text-xl text-white">Anlık Parametreler</h2>
@@ -328,9 +322,6 @@
         </div>
     </section>
 
-    {{-- ════════════════════════════════════════════════════════
-         BULANIK MANTIK TEHDİT ANALİZİ
-    ════════════════════════════════════════════════════════ --}}
     <section>
         <div id="fuzzy-logic-section" class="glass rounded-xl p-5 border border-purple-500/30 bg-purple-500/5">
             <h3 class="font-display font-semibold text-purple-300 mb-4 flex items-center gap-2">
@@ -379,9 +370,6 @@
         </div>
     </section>
 
-    {{-- ════════════════════════════════════════════════════════
-         LLM YORUM BÖLÜMÜ
-    ════════════════════════════════════════════════════════ --}}
     <section>
         <div id="llm-storm-actions" class="glass rounded-xl p-5 border border-white/10">
             <div class="flex items-center gap-2 mb-3">
@@ -405,9 +393,6 @@
         </div>
     </section>
 
-    {{-- ════════════════════════════════════════════════════════
-         3D GÜNEŞ SİSTEMİ ANİMASYONU
-    ════════════════════════════════════════════════════════ --}}
     <section>
         <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
@@ -451,12 +436,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * SOLARIS 3D GÜNEŞ SİSTEMİ ANİMASYONU
- * Canlı verilerle senkronize Three.js görselleştirme
- * ═══════════════════════════════════════════════════════════════════════════
- */
+
 const SolarSystem3D = {
     scene: null,
     camera: null,
@@ -1121,13 +1101,6 @@ const SolarSystem3D = {
     }
 };
 
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * SOLARIS - Canlı Veri AJAX Güncelleme Sistemi
- * 10 Kritik Parametre için çoklu periyot güncelleme
- * ═══════════════════════════════════════════════════════════════════════════
- */
-
 // Base URL for cPanel compatibility (must be before object)
 const _BASE = window.SOLARIS_BASE || '';
 const WCS_PARAM_KEYS = [
@@ -1170,9 +1143,7 @@ const WCS_DEFAULT_AHP_WEIGHTS = {
 };
 
 const SolarisLive = {
-    // ═══════════════════════════════════════════════════════════════════════
-    // API ENDPOINTS - Tüm veri kaynakları
-    // ═══════════════════════════════════════════════════════════════════════
+
     endpoints: {
         // 1 DAKİKA - DSCOVR/GOES Anlık
         plasma: _BASE + '/api/solar/plasma',
@@ -1225,9 +1196,6 @@ const SolarisLive = {
     currentStormJSON: null,
     historicStorms: [],
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // BAŞLATMA
-    // ═══════════════════════════════════════════════════════════════════════
     init: function() {
         console.log('🌞 Solaris Live Data System başlatılıyor...');
         this.loadHistoricStorms();
@@ -1254,9 +1222,6 @@ const SolarisLive = {
     },
 
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // SABİT DEĞERLER
-    // ═══════════════════════════════════════════════════════════════════════
     setStaticValues: function() {
         this.data.kp_indeksi = this.data.kp_indeksi || 4.1;
         this.updateCard('kp-index', this.data.kp_indeksi, '');
@@ -1271,9 +1236,6 @@ const SolarisLive = {
         this.updateCard('xray-flux', this.formatXRay(this.data.x_ray_flux), '');
     },
 
-    /**
-     * Fırtına Formülleri (20 Denklem) Hesaplanması
-     */
     calculateStormFormulas: function() {
         const np = this.data.proton_yogunlugu_np || 1;
         const vp = this.data.proton_hizi_vp || 400;
@@ -1368,9 +1330,6 @@ const SolarisLive = {
         this.calculateFuzzyLogic();
     },
     
-    /**
-     * Bulanık Mantık Tehdit Analizi
-     */
     calculateFuzzyLogic: function() {
         const data = this.data;
         const formulas = this.currentStormJSON?.formulas || {};
@@ -1480,9 +1439,6 @@ const SolarisLive = {
         this.calculateWeightedCosineConfirmation();
     },
     
-    /**
-     * AWS Bedrock LLM Analizi
-     */
     invokeLLMAnalysis: async function(similarity) {
         const data = this.data;
         const formulas = this.currentStormJSON?.formulas || {};
@@ -1553,9 +1509,6 @@ const SolarisLive = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // AJAX İstekleri
-    // ═══════════════════════════════════════════════════════════════════════
     fetchMinuteData: function() {
         const self = this;
         console.log('⏱️ [1 DK] Dakikalık veriler çekiliyor...');
@@ -1711,9 +1664,6 @@ const SolarisLive = {
         });
     },
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // YARDIMCI FONKSİYONLAR
-    // ═══════════════════════════════════════════════════════════════════════
     parseXRayFluxValue: function(value) {
         if (typeof value === 'number' && Number.isFinite(value)) return Math.max(0, value);
         const text = (value || '').toString().trim().toUpperCase();
