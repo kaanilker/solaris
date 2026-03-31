@@ -167,13 +167,6 @@ class SolarDataController extends Controller
         });
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════════════
-     * Kyoto WDC - Dst İndeksi
-     * Kaynak: https://wdc.kugi.kyoto-u.ac.jp/dst_realtime/presentmonth/index.html
-     * Güncelleme: Her 1 saat
-     * ═══════════════════════════════════════════════════════════════════════════
-     */
     public function getDst()
     {
         $cacheKey = 'solar_dst_index';
@@ -202,9 +195,6 @@ class SolarDataController extends Controller
         });
     }
 
-    /**
-     * Dst HTML'den parse et
-     */
     private function parseDstFromHtml($html)
     {
         $dst = null;
@@ -245,13 +235,6 @@ class SolarDataController extends Controller
         ];
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════════════
-     * Kyoto WDC - SYM-H, ASY-H, AE İndeksleri
-     * Kaynak: https://wdc.kugi.kyoto-u.ac.jp/ae_realtime/today/today.html
-     * Güncelleme: Her 1 dakika
-     * ═══════════════════════════════════════════════════════════════════════════
-     */
     public function getAeIndices()
     {
         $cacheKey = 'solar_ae_indices';
@@ -360,11 +343,6 @@ class SolarDataController extends Controller
         return 16.0;
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════════════
-     * PC (Polar Cap) İndeksi
-     * ═══════════════════════════════════════════════════════════════════════════
-     */
     public function getPcIndex()
     {
         $cacheKey = 'solar_pc_index';
@@ -402,11 +380,6 @@ class SolarDataController extends Controller
         });
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════════════
-     * TEC (Total Electron Content) - IONEX Parse
-     * ═══════════════════════════════════════════════════════════════════════════
-     */
     public function getTec()
     {
         $cacheKey = 'solar_tec_data';
@@ -435,11 +408,6 @@ class SolarDataController extends Controller
         });
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════════════
-     * Tüm verileri tek seferde al (Dashboard için)
-     * ═══════════════════════════════════════════════════════════════════════════
-     */
     public function getAllData()
     {
         $dst = $this->fetchDstDirect();
