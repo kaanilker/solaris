@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tarihsel Fırtınalar — Güneş Fırtınaları | Solar Watch</title>
+<title>Tarihi Fırtınalar — Güneş Fırtınaları | Solar Watch</title>
 <meta name="description" content="Tarihi güneş fırtınalarını 3D interaktif görselleştirme ile keşfedin. Carrington 1859, Quebec 1989 ve daha fazlası.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -555,7 +555,6 @@ body:active { cursor: grabbing; }
 </head>
 <body>
 
-<!-- ============ NAVIGATION BAR ============ -->
 <header id="main-header" class="bg-slate-900 sticky top-0 z-[500] border-b border-slate-800">
     <nav class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 gap-4">
@@ -594,7 +593,7 @@ body:active { cursor: grabbing; }
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            Tarihsel Fırtınalar
+                            Tarihi Fırtınalar
                         </a>
                     </li>
                     <li>
@@ -645,7 +644,7 @@ body:active { cursor: grabbing; }
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Tarihsel Fırtınalar
+                        Tarihi Fırtınalar
                     </a>
                 </li>
                 <li>
@@ -662,7 +661,6 @@ body:active { cursor: grabbing; }
     <div class="divider-solar"></div>
 </header>
 
-<!-- ============ TAM EKRAN ANİMASYONLU ARKA PLAN ============ -->
 <div class="gecmis-fullscreen-backdrop" aria-hidden="true">
   <!-- Güneş çekirdeği -->
   <div class="gecmis-sun-core"></div>
@@ -1011,7 +1009,7 @@ body:active { cursor: grabbing; }
 
 <script>
 
-// ─── RENDERER ────────────────────────────────────────────────────────────────
+// RENDERER 
 const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -1026,7 +1024,7 @@ window.addEventListener('resize', () => {
 });
 const gltfLoader = new THREE.GLTFLoader();
 
-// ─── GÜNEŞ BİLGİSİ ───────────────────────────────────────────────────────────
+// GÜNEŞ BİLGİSİ
 const SUN_INFO = {
   info: {
     'Tip': 'G2V Sarı Cüce Yıldız', 'Yaş': '~4.6 Milyar Yıl',
@@ -1059,7 +1057,7 @@ function loadModelWithFallback(loader, fileName, onLoad, onError) {
   tryLoad();
 }
 
-// ─── PLANET DATA ──────────────────────────────────────────────────────────────
+// PLANET DATA 
 const PLANETS = [
   { name: 'Merkür', key: 'mercury', r: 0.38, orbitR: 8, color: 0xb5b5b5, emissive: 0x222222, speed: 4.74, tilt: 0.034, modelFile: 'mercury1.glb', info: { 'Yarıçap': '2,439 km', 'Güneşe Uzaklık': '57.9 M km', 'Yörünge Süresi': '88 gün', 'Yüzey Sıcaklığı': '-180 / +430 °C', 'Uydu Sayısı': '0', 'Tip': 'Kayalık gezegen' } },
   { name: 'Venüs', key: 'venus', r: 0.95, orbitR: 13.5, color: 0xe8c97a, emissive: 0x331100, speed: 3.50, tilt: 177.4, modelFile: 'venus.glb', info: { 'Yarıçap': '6,051 km', 'Güneşe Uzaklık': '108.2 M km', 'Yörünge Süresi': '225 gün', 'Yüzey Sıcaklığı': '+465 °C', 'Uydu Sayısı': '0', 'Tip': 'Kayalık gezegen' } },
@@ -1071,13 +1069,13 @@ const PLANETS = [
   { name: 'Neptün', key: 'neptune', r: 1.7, orbitR: 96, color: 0x4b70dd, emissive: 0x000820, speed: 0.54, tilt: 28.3, modelFile: 'neptune.glb', info: { 'Yarıçap': '24,622 km', 'Güneşe Uzaklık': '4,495 M km', 'Yörünge Süresi': '164.8 yıl', 'Yüzey Sıcaklığı': '-200 °C', 'Uydu Sayısı': '16', 'Tip': 'Buz devi' } }
 ];
 
-// ─── LIGHTING ─────────────────────────────────────────────────────────────────
+//  LIGHTING 
 const sunLight = new THREE.PointLight(0xfff0cc, 4.0, 600);
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
 scene.add(new THREE.AmbientLight(0x0d0d1a, 2.5));
 
-// ─── STARS ────────────────────────────────────────────────────────────────────
+// STARS 
 function buildStars() {
   const N = 14000;
   const pos = new Float32Array(N * 3);
@@ -1110,7 +1108,7 @@ scene.add(buildStars());
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0x8899ff, size: 1.0, sizeAttenuation: true, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending })));
 }
 
-// ─── SUN ──────────────────────────────────────────────────────────────────────
+// SUN 
 const sunGroup = new THREE.Group();
 scene.add(sunGroup);
 const sunCore = new THREE.Mesh(new THREE.SphereGeometry(4.5, 64, 64), new THREE.MeshBasicMaterial({ color: 0xffd060 }));
@@ -1143,7 +1141,7 @@ const coronaMeshes = coronaData.map(([r, c, o]) => {
   sunGroup.add(m); return m;
 });
 
-// ─── SOLAR WIND ───────────────────────────────────────────────────────────────
+//  SOLAR WIND 
 const SW_N = 5000;
 const swPos  = new Float32Array(SW_N * 3);
 const swVel  = new Float32Array(SW_N * 3);
@@ -1195,7 +1193,7 @@ const swMat = new THREE.PointsMaterial({
 });
 scene.add(new THREE.Points(swGeo, swMat));
 
-// ─── STORM STATE ──────────────────────────────────────────────────────────────
+// STORM STATE 
 let stormLevel = 0;
 function updateSunVisual(level) {
   const t = level / 5;
@@ -1217,7 +1215,7 @@ function updateSunVisual(level) {
   swMat.opacity = 0.55 + t * 0.35;
 }
 
-// ─── ORBITS + ASTEROID BELT ───────────────────────────────────────────────────
+// ORBITS + ASTEROID BELT 
 function makeOrbit(r) {
   const pts = [];
   for (let i = 0; i <= 256; i++) { const a = (i/256)*Math.PI*2; pts.push(new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r)); }
@@ -1231,7 +1229,7 @@ PLANETS.forEach(p => scene.add(makeOrbit(p.orbitR)));
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0x888888, size: 0.12, transparent: true, opacity: 0.55 })));
 }
 
-// ─── BUILD PLANETS ────────────────────────────────────────────────────────────
+// BUILD PLANETS 
 const planetMeshes = [];
 const planetAngles = PLANETS.map(() => Math.random() * Math.PI * 2);
 PLANETS.forEach((pd, i) => {
@@ -1257,7 +1255,7 @@ PLANETS.forEach((pd, i) => {
   }, (err) => { console.warn(`GLB yüklenemedi: ${pd.modelFile}`, err); });
 });
 
-// ─── BOTTOM PILLS ─────────────────────────────────────────────────────────────
+// BOTTOM PILLS
 const bb = document.getElementById('bottombar');
 const sunPill = document.createElement('button');
 sunPill.className = 'planet-pill sun-pill'; sunPill.textContent = '☉ GÜNEŞ';
@@ -1269,7 +1267,7 @@ PLANETS.forEach((pd, i) => {
 });
 const pills = document.querySelectorAll('.planet-pill:not(.sun-pill)');
 
-// ─── CAMERA ───────────────────────────────────────────────────────────────────
+// CAMERA
 let camTheta=0.4, camPhi=0.52, camRadius=130;
 let targetTheta=camTheta, targetPhi=camPhi, targetRadius=camRadius;
 let targetLookAt=new THREE.Vector3(0,0,0);
@@ -1301,7 +1299,7 @@ canvas.addEventListener('touchmove', e => {
   if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);targetRadius=Math.max(2,Math.min(350,targetRadius-(d-lastDist)*0.25));lastDist=d;}
 }, { passive:true });
 
-// ─── RAYCASTER ────────────────────────────────────────────────────────────────
+// RAYCASTER
 const raycaster = new THREE.Raycaster();
 const mouse2d = new THREE.Vector2();
 let mouseStill=true, mouseDownPos={x:0,y:0};
@@ -1333,7 +1331,7 @@ canvas.addEventListener('mouseup', e => {
   if(hitIdx!==-1){ showPlanetInfo(hitIdx); } else { if(panelState==='visible') setPanelState('peeking'); }
 });
 
-// ─── INFO PANEL ───────────────────────────────────────────────────────────────
+// INFO PANEL
 const infoPanel=document.getElementById('info');
 const infoTab=document.getElementById('info-tab');
 const pnameEl=document.getElementById('pname');
@@ -1371,7 +1369,7 @@ function flyToPlanet(idx) {
   const pd=PLANETS[idx]; targetRadius=Math.max(pd.r*5,Math.min(25,pd.r*7));
 }
 
-// ─── VIEW PRESETS ─────────────────────────────────────────────────────────────
+// VIEW PRESETS
 function resetView() {
   targetTheta=0.4; targetPhi=0.52; targetRadius=130; targetLookAt.set(0,0,0);
   lockedPlanet=null; sunLocked=false;
@@ -1391,7 +1389,7 @@ document.getElementById('vtop').addEventListener('click', () => {
 });
 document.getElementById('resetbtn').addEventListener('click', resetView);
 
-// ─── G BİLGİ PANELİ ──────────────────────────────────────────────────────────
+// G BİLGİ PANELİ
 // stormPanel değişkeni sonraki bölümde tanımlanıyor — ref için geciktirme yok
 const gInfoPanel  = document.getElementById('g-info-panel');
 const gInfoClose  = document.getElementById('g-info-close');
@@ -1431,7 +1429,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ─── SPEED SLIDER ─────────────────────────────────────────────────────────────
+// SPEED SLIDER
 const speedSlider=document.getElementById('speedslider');
 const speedVal=document.getElementById('speedval');
 let simSpeed=1.0;
@@ -1439,7 +1437,7 @@ speedSlider.addEventListener('input', () => { simSpeed=parseFloat(speedSlider.va
 
 
 
-// ─── FIRTINA VERİSİ ──────────────────────────────────────────────────────────
+// FIRTINA VERİSİ
 const STORMS = [
   {
     id: 'carrington', year: '1 EYLÜL 1859', name: 'Carrington Olayı',
@@ -1503,7 +1501,7 @@ const STORMS = [
   },
 ];
 
-// ─── KART OLUŞTURMA ───────────────────────────────────────────────────────────
+// KART OLUŞTURMA
 const gClassMap = ['storm-g0','storm-g1','storm-g2','storm-g3','storm-g4','storm-g5'];
 const gLabelMap = ['G0','G1','G2','G3','G4','G5'];
 
@@ -1533,7 +1531,7 @@ function buildStormCards() {
 }
 buildStormCards();
 
-// ─── SEÇİM → YÜKLEME ─────────────────────────────────────────────────────────
+// SEÇİM → YÜKLEME
 function startWithStorm(storm) {
   const sel = document.getElementById('storm-select');
   sel.style.opacity = '0';
@@ -1566,7 +1564,7 @@ function startWithStorm(storm) {
   }, 800);
 }
 
-// ─── STORM PANEL LOGIC ────────────────────────────────────────────────────────
+// STORM PANEL
 const stormPanel=document.getElementById('storm-panel');
 const stormTab=document.getElementById('storm-tab');
 const stormAlert=document.getElementById('storm-alert');
@@ -1580,7 +1578,7 @@ function toggleStormPanel() {
 stormTab.addEventListener('click', toggleStormPanel);
 toggleBtn.addEventListener('click', () => { stormPanel.classList.remove('sp-hidden'); stormTab.textContent='−'; });
 
-// ─── GERİ BUTONU ─────────────────────────────────────────────────────────────
+// GERİ BUTONU
 document.getElementById('back-btn').addEventListener('click', () => {
   // UI'ı gizle
   document.getElementById('storm-toggle-btn').style.display = 'none';
@@ -1601,7 +1599,7 @@ document.getElementById('back-btn').addEventListener('click', () => {
   requestAnimationFrame(() => requestAnimationFrame(() => { sel.style.opacity = '1'; }));
 });
 
-// ─── HESAPLA ──────────────────────────────────────────────────────────────────
+// HESAPLA
 function bindStormAlertQ() {
   const q = document.getElementById('storm-alert-q');
   if (!q) return;
@@ -1611,7 +1609,7 @@ function bindStormAlertQ() {
   });
 }
 
-// ─── FIRTINA SEVİYESİ GÜNCELLE ────────────────────────────────────────────────
+// FIRTINA SEVİYESİ GÜNCELLE
 function setParamVal(id, text, level) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -1700,7 +1698,7 @@ function calcStorm(params) {
 // İlk yüklemede soru işaretini bağla
 bindStormAlertQ();
 
-// ─── ANIMATION LOOP ───────────────────────────────────────────────────────────
+// ANIMATION LOOP
 const clock = new THREE.Clock();
 let elapsed = 0;
 function animate() {
@@ -1738,7 +1736,6 @@ function animate() {
 animate();
 
 
-// ════════════════════════════════════════════════════════════════════
 </script>
 
 <!-- MOBILE MENU TOGGLE SCRIPT -->
