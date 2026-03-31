@@ -65,12 +65,6 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-`.env` dosyasına API anahtarlarını ekle:
-```env
-NOAA_API_BASE=https://services.swpc.noaa.gov
-NASA_DONKI_API=https://kauai.ccmc.gsfc.nasa.gov/DONKI
-OPENAI_API_KEY=your_key_here
-```
 
 ```bash
 # Sunucuyu başlat
